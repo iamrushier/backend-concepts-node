@@ -7,3 +7,13 @@ Skills:
 - Understanding core Node architecture
 - Manual routing
 - Request/response handling
+
+### 2. Express Fundamentals
+
+POC: CRUD API for a “Task List” without a database (in-memory array).
+
+Skills:
+
+- Express routing basics
+- Middleware usage
+- Structuring a minimal REST API
