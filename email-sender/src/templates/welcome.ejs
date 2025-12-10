@@ -1,0 +1,18 @@
+<!-- src/templates/welcome.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Welcome Email</title>
+  </head>
+  <body style="font-family: Arial; background: #f5f5f5; padding: 20px">
+    <div style="background: white; padding: 20px; border-radius: 8px">
+      <h2>Welcome, <%= name %></h2>
+      <p>This is sample HTML email sent using Nodemailer + Express</p>
+      <p>Your registered email is: <strong><%= email %></strong></p>
+      <p>Regards, <br />Rushi</p>
+      <hr />
+      <small>Sent using <%= provider %></small>
+    </div>
+  </body>
+</html>
