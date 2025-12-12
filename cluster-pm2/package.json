@@ -1,0 +1,28 @@
+{
+  "name": "cluster-pm2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "pm2:single": "pm2 start ./pm2/ecosystem.single.config.cjs",
+    "pm2:cluster": "pm2 start ./pm2/ecosystem.config.cjs",
+    "test": "node load-test/test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.23.0",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.1",
+    "autocannon": "^8.0.0",
+    "pm2": "^6.0.14",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
