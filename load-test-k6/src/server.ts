@@ -1,7 +1,15 @@
 // src/server.ts
 import express from "express";
+import rateLimit from "express-rate-limit";
+
 const app = express();
 
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 20, // Max 20 requests per minute
+  message: "Too many requests",
+});
+app.use(limiter);
 app.use(express.json());
 
 let tasks = [
@@ -9,7 +17,7 @@ let tasks = [
   { id: 2, title: "Build an API" },
 ];
 
-app.get("/tasks", (req, res) => {
+app.get("/tasks", (_, res) => {
   res.json(tasks);
 });
 
