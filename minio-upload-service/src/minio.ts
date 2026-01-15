@@ -22,3 +22,15 @@ export async function ensureBucket() {
         console.log(`Bucket "${BUCKET_NAME}" already exists`);
     }
 }
+
+/**
+ * To make images publicly available:
+ * > docker exec -it minio sh
+ * > mc alias set local http://localhost:9000 minioadmin minioadmin
+ * > mc anonymous set download local/uploads
+ * 
+ * If object name is:
+ *      images/abc123.webp
+ * Image is now accessible directly:
+ *      http://localhost:9000/uploads/images/abc123.webp
+ */

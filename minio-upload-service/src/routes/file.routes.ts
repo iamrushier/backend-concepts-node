@@ -2,6 +2,8 @@
 import { Router, type Request, type Response } from "express";
 import { upload } from "../middleware/multer.js";
 import { minioClient, BUCKET_NAME } from "../minio.js";
+import crypto from "crypto";
+import sharp from "sharp"; // For security hardening
 
 const router = Router();
 
@@ -14,7 +16,16 @@ router.post(
         if (!req.file) {
             return res.status(400).json({ error: "File is required" });
         }
-        const objectName = `${Date.now()}-${req.file.originalname}`;
+
+        // 🔒 HARD VALIDATION
+        try {
+            await sharp(req.file.buffer).metadata();
+        } catch {
+            return res.status(400).json({ error: "Invalid image file" });
+        }
+
+        const ext = req.file.mimetype.split("/")[1];
+        const objectName = `images/${crypto.randomUUID()}.${ext}`;
 
         await minioClient.putObject(
             BUCKET_NAME,
@@ -23,6 +34,7 @@ router.post(
             req.file.size,
             {
                 "Content-Type": req.file.mimetype,
+                "Cache-Control": "public, max-age=31536000",
             }
         )
         res.json({
@@ -33,15 +45,26 @@ router.post(
 )
 
 router.get(
-    "/download/:objectName",
+    "/images/:objectName",
 
     async (req: Request, res: Response) => {
         const { objectName } = req.params;
+        if (!objectName || typeof objectName !== "string") {
+            return res.status(400).json({ message: "Invalid objectName" })
+        }
+        const stat = await minioClient.statObject(
+            BUCKET_NAME,
+            objectName
+        );
+
+        res.setHeader("Content-Type", stat.metaData["content-type"]);
+        res.setHeader("Cache-Control", "public, max-age=31536000");
+
         const stream = await minioClient.getObject(
             BUCKET_NAME,
-            objectName as string
+            objectName
         );
-        res.setHeader("Content-Disposition", `attachment; filename="${objectName}"`);
+
         stream.pipe(res);
     }
 )
