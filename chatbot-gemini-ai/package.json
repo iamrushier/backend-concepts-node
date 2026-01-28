@@ -12,10 +12,14 @@
   "type": "module",
   "dependencies": {
     "@ai-sdk/xai": "^3.0.29",
+    "@google-cloud/dialogflow": "^7.4.0",
     "@google/genai": "^1.38.0",
     "ai": "^6.0.45",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
-    "prompt-sync": "^4.2.0"
+    "express": "^5.2.1",
+    "openai": "^6.16.0",
+    "prompt-sync": "^4.2.0",
+    "uuid": "^13.0.0"
   }
 }

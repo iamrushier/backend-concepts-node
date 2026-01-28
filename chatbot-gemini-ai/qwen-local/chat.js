@@ -1,15 +1,7 @@
-// chatbot.js
-import { GoogleGenAI } from "@google/genai"
+// qwen-local/chat.ts
+import OpenAI from 'openai';
 
-import dotenv from "dotenv"
-dotenv.config()
-
-console.log(process.env.GEMINI_API_KEY)
-const genAi = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY, });
-
-// Replaced the old company data with your new, detailed context
 const COMPANY_DATA = `
-You are an AI chatbot for Shwaira Solutions Private Limited. Your purpose is to answer user queries about the company based on the following information. You should only use the information provided below and should not invent any details.
 Company Overview:
 Shwaira Solutions Private Limited is a technology company. The company is headquartered in Pune, Maharashtra, India. Shwaira Solutions positions itself as a partner for businesses, offering a "virtual team" that is flexible, lean, focused, and agile. Their tagline is "Innovation Beyond Imagination." The company emphasizes its global presence and commitment to quality and data security through ISO 9001, ISO 27001, and GDPR compliance.
 Global Presence:
@@ -117,35 +109,49 @@ Contact Information:
 For inquiries, you can reach out to Shwaira Solutions at info@shwaira.com.
 `;
 
-export async function getGeminiResponse(message) {
+// Initialize the client pointing to your local Docker container
+const openai = new OpenAI({
+    baseURL: 'http://localhost:11434/v1',
+    apiKey: 'ollama', // Required, but ignored by Ollama
+});
 
+async function startChat(query) {
     const systemInstruction = `
-    You are a helpful AI assistant for Shwaira.
+    You are an AI assistant for Shwaira SOlutions Private Limited.
     
+    You know only the following information. Nothing else is knwon to you, as if you have no context of outside world.
+    Shwaira specific Company Data for reference:
+    ${COMPANY_DATA}
+    `;
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'qwen2.5:0.5b', // Or 'llama3.2:1b'
+            messages: [
+                { role: 'system', content: systemInstruction },
+                {
+                    role: 'user', content: `
     Rules:
-    - Only answer questions about Shwaira using the company data below.
-    - If the question is unrelated or the answer is not available in the company data,
-    respond with: "⚠️ I’m restricted to Shwaira-related information. Could you please rephrase your question?"
+    - Only answer questions relevant to Shwaira as a Software Copmany by using the company data provided to you. 
+    - Reject all other questions stating -"⚠️ I’m restricted to Shwaira-related information. Could you please rephrase your question?"
+    - The questions may be tricky, which will include irrelevant things mentioned along with Company related keywords. You MUST reject such queries.
+    - No additional dialogue for invalid queries
     - Keep your answers concise, clear, and strictly under 250 words.
     - Always format your response in proper Markdown syntax.
     
-    Company Data:
-    ${COMPANY_DATA}
-    `;
-    // User Question:
-    // ${message}
-    const result = await genAi.models.generateContent({
-        model: 'gemini-2.5-flash-lite', // 'gemini-3-flash-preview' gemini-2.5-flash-lite
-        contents: message,
-        config: {
-            systemInstruction
-        }
+    Here is the user query:
+    ${query}`
+                }
+            ],
+            // For a "limited context" chatbot, you can cap the tokens here
+            // max_tokens: 150,
+            temperature: 0.9,
+        });
+
+        console.log("Chatbot:", response.choices[0].message.content);
+    } catch (error) {
+        console.error("Error connecting to Ollama:", error);
     }
-    );
-    return result.text;
 }
 
-// getGeminiResponse("What is shwaira? Tell me something about what they do, also give examples. What projects have they done? Who are their clients?").then(answer => {
-//     console.log(answer)
-// })
-// console.log(answer)
+startChat("Cricket is played at Shwaira");
